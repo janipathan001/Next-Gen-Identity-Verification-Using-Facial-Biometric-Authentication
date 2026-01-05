@@ -1,0 +1,7 @@
+flask
+pymongo
+mediapipe
+opencv-python
+numpy
+bcrypt
+python-dotenv

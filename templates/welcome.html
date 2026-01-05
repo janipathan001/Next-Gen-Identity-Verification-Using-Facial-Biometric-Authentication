@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome - Face Auth System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
+      background: #000;
+    }
+
+    /* Background with face recognition theme */
+    .animated-bg {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      background: 
+        linear-gradient(135deg, rgba(15, 12, 41, 0.95) 0%, rgba(48, 43, 99, 0.95) 50%, rgba(36, 36, 62, 0.95) 100%),
+        url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1920&q=80') center/cover no-repeat;
+      animation: bg-pulse 20s ease infinite;
+      z-index: 0;
+    }
+
+    .animated-bg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(102, 126, 234, 0.03) 2px,
+          rgba(102, 126, 234, 0.03) 4px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 2px,
+          rgba(102, 126, 234, 0.03) 2px,
+          rgba(102, 126, 234, 0.03) 4px
+        );
+      animation: grid-move 20s linear infinite;
+    }
+
+    @keyframes grid-move {
+      0% {
+        transform: translate(0, 0);
+      }
+      100% {
+        transform: translate(50px, 50px);
+      }
+    }
+
+    @keyframes bg-pulse {
+      0%, 100% { 
+        filter: brightness(1) hue-rotate(0deg);
+      }
+      50% { 
+        filter: brightness(1.05) hue-rotate(5deg);
+      }
+    }
+
+    /* Floating geometric shapes with scanning effect */
+    .shapes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .shape {
+      position: absolute;
+      opacity: 0.15;
+      animation: float-shape 20s infinite ease-in-out;
+    }
+
+    /* Face recognition scanning boxes */
+    .shape:nth-child(1) {
+      width: 120px;
+      height: 120px;
+      border: 3px solid white;
+      border-radius: 10px;
+      left: 10%;
+      top: 20%;
+      animation: scan-box 4s infinite ease-in-out;
+    }
+
+    .shape:nth-child(2) {
+      width: 80px;
+      height: 80px;
+      border: 2px solid white;
+      border-radius: 50%;
+      right: 15%;
+      top: 60%;
+      animation: pulse-shape 3s infinite ease-in-out;
+    }
+
+    .shape:nth-child(3) {
+      width: 100px;
+      height: 100px;
+      border: 3px dashed white;
+      border-radius: 15px;
+      left: 50%;
+      top: 80%;
+      animation: rotate-shape 8s infinite linear;
+    }
+
+    .shape:nth-child(4) {
+      width: 90px;
+      height: 90px;
+      border: 2px solid white;
+      right: 30%;
+      top: 30%;
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      animation: float-shape 6s infinite ease-in-out;
+    }
+
+    .shape:nth-child(5) {
+      width: 110px;
+      height: 110px;
+      border: 3px solid white;
+      border-radius: 20px;
+      left: 70%;
+      top: 50%;
+      animation: scan-box 5s infinite ease-in-out 1s;
+    }
+
+    /* Scanning animation like face detection */
+    @keyframes scan-box {
+      0%, 100% {
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+      }
+      50% {
+        border-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.2);
+      }
+    }
+
+    @keyframes float-shape {
+      0%, 100% {
+        transform: translateY(0) translateX(0);
+      }
+      25% {
+        transform: translateY(-20px) translateX(10px);
+      }
+      50% {
+        transform: translateY(-40px) translateX(-10px);
+      }
+      75% {
+        transform: translateY(-20px) translateX(5px);
+      }
+    }
+
+    @keyframes pulse-shape {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.15;
+      }
+      50% {
+        transform: scale(1.3);
+        opacity: 0.3;
+      }
+    }
+
+    @keyframes rotate-shape {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .hero-section {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .content-wrapper {
+      position: relative;
+      z-index: 3;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      animation: fadeInScale 1s ease-out;
+    }
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .hero-content {
+      text-align: center;
+      color: white;
+    }
+
+    .logo-container {
+      margin-bottom: 2rem;
+      animation: bounceIn 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      animation-fill-mode: both;
+      animation-delay: 0.3s;
+    }
+
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(0) rotate(-180deg);
+      }
+      50% {
+        transform: scale(1.1) rotate(10deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    .logo {
+      width: 140px;
+      height: 140px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 35px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 30px 80px rgba(102, 126, 234, 0.6);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .logo:hover {
+      transform: rotate(360deg) scale(1.1);
+      box-shadow: 0 40px 100px rgba(102, 126, 234, 0.8);
+    }
+
+    .logo::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(transparent, rgba(255,255,255,0.3), transparent 30%);
+      animation: rotate 4s linear infinite;
+    }
+
+    @keyframes rotate {
+      100% { transform: rotate(360deg); }
+    }
+
+    .logo-icon {
+      font-size: 5rem;
+      z-index: 1;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+      animation: pulse-icon 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-icon {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .main-title {
+      font-size: 5rem;
+      font-weight: 900;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #fff 0%, #667eea 50%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeInUp 1s ease-out 0.5s both;
+      text-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+      letter-spacing: -2px;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .subtitle {
+      font-size: 1.8rem;
+      color: rgba(255, 255, 255, 0.95);
+      margin-bottom: 4rem;
+      font-weight: 400;
+      animation: fadeInUp 1s ease-out 0.7s both;
+      text-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2.5rem;
+      margin: 5rem 0;
+      animation: fadeInUp 1s ease-out 0.9s both;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      border-radius: 25px;
+      padding: 3rem 2rem;
+      text-align: center;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-20px) scale(1.05);
+      background: rgba(255, 255, 255, 0.25);
+      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+    }
+
+    .feature-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      display: inline-block;
+      animation: float-icon 3s ease-in-out infinite;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+      transform: scale(1.2) rotateY(360deg);
+    }
+
+    @keyframes float-icon {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .feature-card:nth-child(1) .feature-icon { animation-delay: 0s; }
+    .feature-card:nth-child(2) .feature-icon { animation-delay: 0.5s; }
+    .feature-card:nth-child(3) .feature-icon { animation-delay: 1s; }
+
+    .feature-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: white;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .feature-description {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 1s ease-out 1.1s both;
+      margin-top: 3rem;
+    }
+
+    .btn-custom {
+      padding: 18px 60px;
+      border-radius: 60px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary-custom {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+    }
+
+    .btn-primary-custom::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-primary-custom:hover::before {
+      width: 500px;
+      height: 500px;
+    }
+
+    .btn-primary-custom:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 25px 60px rgba(102, 126, 234, 0.7);
+    }
+
+    .btn-secondary-custom {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary-custom:hover {
+      background: rgba(255, 255, 255, 0.35);
+      border-color: rgba(255, 255, 255, 0.8);
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 25px 60px rgba(255, 255, 255, 0.3);
+    }
+
+    .security-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: rgba(40, 167, 69, 0.25);
+      border: 2px solid rgba(40, 167, 69, 0.6);
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      color: #4ade80;
+      font-weight: 600;
+      margin-top: 3rem;
+      animation: pulse-badge 3s ease-in-out infinite;
+      backdrop-filter: blur(10px);
+    }
+
+    @keyframes pulse-badge {
+      0%, 100% {
+        box-shadow: 0 0 30px rgba(40, 167, 69, 0.4);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 50px rgba(40, 167, 69, 0.6);
+        transform: scale(1.05);
+      }
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce-arrow 2s infinite;
+      color: rgba(255, 255, 255, 0.7);
+      z-index: 10;
+      cursor: pointer;
+    }
+
+    @keyframes bounce-arrow {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(15px); }
+    }
+
+    /* Stats section */
+    .stats-section {
+      margin-top: 6rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      animation: fadeInUp 1.5s ease-out 1.3s both;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+      transform: translateY(-10px);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 800;
+      color: white;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 3rem;
+      }
+
+      .subtitle {
+        font-size: 1.3rem;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .btn-custom {
+        width: 100%;
+        max-width: 350px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .logo {
+        width: 100px;
+        height: 100px;
+      }
+
+      .logo-icon {
+        font-size: 3.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  
+  <div class="shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+
+  <div class="hero-section">
+    <div class="content-wrapper">
+      <div class="hero-content">
+        <div class="logo-container">
+          <div class="logo">
+            <span class="logo-icon">🔐</span>
+          </div>
+        </div>
+
+        <h1 class="main-title">Face Auth System</h1>
+        <p class="subtitle">Next-Generation Biometric Security at Your Fingertips</p>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3 class="feature-title">Lightning Fast</h3>
+            <p class="feature-description">Authenticate in milliseconds with our advanced AI technology</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3 class="feature-title">Privacy First</h3>
+            <p class="feature-description">Your data is encrypted and securely stored</p>
+          </div>
+        </div>
+
+        <div class="cta-buttons">
+          <a href="/login" class="btn-custom btn-primary-custom">Login Now</a>
+          <a href="/register" class="btn-custom btn-secondary-custom">Create Account</a>
+        </div>
+
+        <div class="security-badge">
+          <span>🔒</span>
+          <span>100% Secure & Private</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-indicator">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    // Mouse parallax effect
+    document.addEventListener('mousemove', (e) => {
+      const shapes = document.querySelectorAll('.shape');
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      
+      shapes.forEach((shape, index) => {
+        const speed = (index + 1) * 15;
+        shape.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+      });
+    });
+
+    // Smooth scroll
+    document.querySelector('.scroll-indicator').addEventListener('click', () => {
+      window.scrollTo({
+        top: window.innerHeight,
+        behavior: 'smooth'
+      });
+    });
+  </script>
+</body>
+</html>
