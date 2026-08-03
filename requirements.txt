@@ -5,3 +5,4 @@ opencv-python
 numpy
 bcrypt
 python-dotenv
+gunicorn==23.0.0
