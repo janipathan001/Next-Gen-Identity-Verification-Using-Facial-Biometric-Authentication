@@ -1,8 +1,9 @@
-flask
+Flask
+Flask-PyMongo
+Flask-Bcrypt
 pymongo
 mediapipe
 opencv-python
 numpy
-bcrypt
 python-dotenv
-gunicorn==23.0.0
+gunicorn
